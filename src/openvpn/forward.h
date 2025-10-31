@@ -68,6 +68,8 @@ extern counter_type link_read_bytes_global;
 
 extern counter_type link_write_bytes_global;
 
+void process_single_dco_message(dco_context_t *dco);
+
 void io_wait_dowork(struct context *c, const unsigned int flags);
 
 void pre_select(struct context *c);

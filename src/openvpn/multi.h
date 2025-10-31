@@ -238,6 +238,7 @@ struct multi_route
     time_t last_reference;
 };
 
+void multi_process_single_dco_message(dco_context_t *dco);
 
 /**************************************************************************/
 /**

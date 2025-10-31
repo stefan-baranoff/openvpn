@@ -1269,13 +1269,11 @@ extract_dco_float_peer_addr(const sa_family_t socket_family,
     }
 }
 
-static void
-process_incoming_dco(struct context *c)
+void
+process_single_dco_message(dco_context_t *dco)
 {
 #if defined(ENABLE_DCO) && (defined(TARGET_LINUX) || defined(TARGET_FREEBSD))
-    dco_context_t *dco = &c->c1.tuntap->dco;
-
-    dco_do_read(dco);
+    struct context *c = dco->c;
 
     /* FreeBSD currently sends us removal notifcation with the old peer-id in
      * p2p mode with the ping timeout reason, so ignore that one to not shoot
@@ -1311,7 +1309,18 @@ process_incoming_dco(struct context *c)
                 dco->dco_message_type);
             return;
     }
+#endif /* if defined(ENABLE_DCO) && (defined(TARGET_LINUX) || defined(TARGET_FREEBSD)) */
+}
 
+static void
+process_incoming_dco(struct context *c)
+{
+#if defined(ENABLE_DCO) && (defined(TARGET_LINUX) || defined(TARGET_FREEBSD))
+    dco_context_t *dco = &c->c1.tuntap->dco;
+
+    dco_do_read(dco);
+
+    process_single_dco_message(dco);
 #endif /* if defined(ENABLE_DCO) && (defined(TARGET_LINUX) || defined(TARGET_FREEBSD)) */
 }
 

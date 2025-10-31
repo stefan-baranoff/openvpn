@@ -3288,14 +3288,12 @@ process_incoming_del_peer(struct multi_context *m, struct multi_instance *mi,
     multi_signal_instance(m, mi, SIGTERM);
 }
 
-bool
-multi_process_incoming_dco(struct multi_context *m)
+void
+multi_process_single_dco_message(dco_context_t *dco)
 {
-    dco_context_t *dco = &m->top.c1.tuntap->dco;
+    struct multi_context *m = dco->c->multi;
 
     struct multi_instance *mi = NULL;
-
-    int ret = dco_do_read(&m->top.c1.tuntap->dco);
 
     int peer_id = dco->dco_message_peer_id;
 
@@ -3304,7 +3302,7 @@ multi_process_incoming_dco(struct multi_context *m)
      */
     if (peer_id < 0)
     {
-        return ret > 0;
+        return;
     }
 
     if ((peer_id < m->max_clients) && (m->instances[peer_id]))
@@ -3357,6 +3355,17 @@ multi_process_incoming_dco(struct multi_context *m)
     dco->dco_del_peer_reason = -1;
     dco->dco_read_bytes = 0;
     dco->dco_write_bytes = 0;
+}
+
+bool
+multi_process_incoming_dco(struct multi_context *m)
+{
+    dco_context_t *dco = &m->top.c1.tuntap->dco;
+
+    int ret = dco_do_read(&m->top.c1.tuntap->dco);
+
+    multi_process_single_dco_message(dco);
+
     return ret > 0;
 }
 #endif /* if defined(ENABLE_DCO) && defined(TARGET_LINUX) */
