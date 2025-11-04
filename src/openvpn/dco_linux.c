@@ -1097,6 +1097,7 @@ ovpn_handle_msg(struct nl_msg *msg, void *arg)
      * retrieved from the message, so that the rest of the OpenVPN code can
      * react as need be.
      */
+    int ret = NL_OK;
     switch (gnlh->cmd)
     {
         case OVPN_CMD_PEER_GET:
@@ -1106,17 +1107,20 @@ ovpn_handle_msg(struct nl_msg *msg, void *arg)
 
         case OVPN_CMD_PEER_DEL_NTF:
         {
-            return ovpn_handle_peer_del_ntf(dco, attrs);
+            ret = ovpn_handle_peer_del_ntf(dco, attrs);
+            break;
         }
 
         case OVPN_CMD_PEER_FLOAT_NTF:
         {
-            return ovpn_handle_peer_float_ntf(dco, attrs);
+            ret = ovpn_handle_peer_float_ntf(dco, attrs);
+            break;
         }
 
         case OVPN_CMD_KEY_SWAP_NTF:
         {
-            return ovpn_handle_key_swap_ntf(dco, attrs);
+            ret = ovpn_handle_key_swap_ntf(dco, attrs);
+            break;
         }
 
         default:
@@ -1125,7 +1129,26 @@ ovpn_handle_msg(struct nl_msg *msg, void *arg)
             return NL_STOP;
     }
 
-    return NL_OK;
+    if (ret != NL_OK)
+    {
+        return ret;
+    }
+
+    switch (dco->c->mode)
+    {
+        case CM_TOP:
+            multi_process_single_dco_message(dco);
+            break;
+
+        case CM_P2P:
+            process_single_dco_message(dco);
+            break;
+
+        default:
+            ASSERT(false);
+    }
+
+    return ret;
 }
 
 int

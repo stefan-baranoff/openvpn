@@ -68,6 +68,8 @@ extern counter_type link_read_bytes_global;
 
 extern counter_type link_write_bytes_global;
 
+void process_single_dco_message(dco_context_t *dco);
+
 void get_io_flags_dowork_udp(struct context *c, struct multi_io *multi_io,
                              const unsigned int flags);
 
